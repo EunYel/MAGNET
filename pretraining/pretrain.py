@@ -70,6 +70,17 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description="Run pretraining")
     parser.add_argument("input_file", help="Path to the input pickle file containing preprocessed graph objects.")
+    parser.add_argument("--node_dim", type=int, default=768)
+    parser.add_argument("--edge_dim", type=int, default=1)
+    parser.add_argument("--num_blocks", type=int, default=4)
+    parser.add_argument("--num_heads", type=int, default=8)
+    parser.add_argument("--last_average", action="store_true")
+    parser.add_argument("--model_dim", type=int, default=256)
+    parser.add_argument("--temperature", type=float, default=0.15)
+    parser.add_argument("--lr", type=float, default=1e-5)
+    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--train_epoch", type=int, default=10)
+
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -84,37 +95,34 @@ def main():
 
     print(f"✅ Loaded {len(all_graphs)} graphs from {input_file}")
     
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     model = GraphTransformerModel(
-        node_dim=768,
-        edge_dim=1,
-        num_blocks=4,  # number of graph transformer blocks
-        num_heads=8,
-        last_average=True,  # whether to average or concatenation at the last block
-        model_dim=256  # if None, node_dim will be used as the dimension of the graph transformer block
+        node_dim=args.node_dim,
+        edge_dim=args.edge_dim,
+        num_blocks=args.num_blocks,
+        num_heads=args.num_heads,
+        last_average=args.last_average,
+        model_dim=args.model_dim
     ).to(device)
 
-    contrastive_loss = ContrastiveLoss(temperature=0.15)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+    contrastive_loss = ContrastiveLoss(temperature=args.temperature)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # Example usage
     train_dataset, valid_dataset, test_dataset = torch.utils.data.random_split(all_graphs, 
         [int(0.8 * len(all_graphs)), int(0.1 * len(all_graphs)), len(all_graphs) - int(0.8 * len(all_graphs)) - int(0.1 * len(all_graphs))])
 
-    # DataLoader 생성
-    batch_size = 16
-
-    train_loader = torch.utils.data.DataLoader(MaskedGraphDataset(train_dataset, mask_ratio=0.15, num_masks=2), batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
-    valid_loader = torch.utils.data.DataLoader(MaskedGraphDataset(valid_dataset, mask_ratio=0, num_masks=2), batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-    test_loader = torch.utils.data.DataLoader(MaskedGraphDataset(test_dataset, mask_ratio=0, num_masks=2), batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
+    train_loader = torch.utils.data.DataLoader(MaskedGraphDataset(train_dataset, mask_ratio=0.15, num_masks=2), batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
+    valid_loader = torch.utils.data.DataLoader(MaskedGraphDataset(valid_dataset, mask_ratio=0, num_masks=2), batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
+    test_loader = torch.utils.data.DataLoader(MaskedGraphDataset(test_dataset, mask_ratio=0, num_masks=2), batch_size=args.batch_size, shuffle=False, collate_fn=collate_fn)
 
     from tqdm import tqdm
 
     train_losses = []
     valid_losses = []
-
-    for epoch in range(10): 
+    
+    for epoch in range(args.train_epoch): 
         model.train()
         total_loss = 0
         train_loader_tqdm = tqdm(train_loader, desc=f"Epoch {epoch+1} Training", leave=True)
@@ -186,9 +194,6 @@ def main():
             valid_losses.append(avg_valid_loss)
             print(f"Epoch {epoch+1}, Valid Loss: {avg_valid_loss:.4f}")
 
-    # torch.save(model.state_dict(), f"graph_transformer_model_temp{0.2}_mask{0.3}_epoch{50}.pt")
-    # print("Model saved successfully!")
-
     # Testing 단계
     model.eval()
     test_loss = 0
@@ -222,7 +227,7 @@ def main():
         
 
     # 지정한 출력 디렉토리
-    output_dir = Path("outputs")
+    output_dir = Path("Outputs")
     output_dir.mkdir(parents=True, exist_ok=True)  # 디렉토리가 없으면 생성
 
     # 저장 경로 설정
@@ -244,7 +249,7 @@ def main():
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(loss_plot_path)
-    print(f"📊 Loss plot saved to: {loss_plot_path}")
+    print(f"Loss plot saved to: {loss_plot_path}")
 
 
     
