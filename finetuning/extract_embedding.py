@@ -221,7 +221,7 @@ def generate_combined_embeddings(df, graph_embeddings, device="cuda"):
 def main():
     
     parser = argparse.ArgumentParser(description="Run finetuning")
-    parser.add_argument("input_file", help="Path to the input pickle file (contains 'all_graphs' and 'filtered_data').")
+    parser.add_argument("--input_file", required=True, help="Path to the input pickle file (contains 'all_graphs' and 'filtered_data').")
     parser.add_argument("--pt_file", required=True, help="Path to the trained model weights (.pt file).")
     args = parser.parse_args()
 
