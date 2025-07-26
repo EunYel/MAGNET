@@ -71,7 +71,7 @@ python extract_embedding.py \
 
 ### 3-2. Downstream Tasks
 
-**⚠️주의 : 모든 downstream dataset의 label 컬럼 이름은 반드시 `labels`로 변경되어 있어야 합니다.**
+**⚠️주의 : downstream dataset에서 사용할 target 컬럼은 반드시 `labels`로 변경되어 있어야 합니다.**
 
 
 #### (1) Classification
