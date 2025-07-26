@@ -85,7 +85,7 @@ chmod +x run_classification.sh
 
 * 📤 출력: `classification_logs/kfold_classification.log`
 
----
+___
 
 #### 📗 (2) Regression
 
