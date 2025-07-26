@@ -19,7 +19,7 @@ lr=0.005
 weight_decay=1e-3
 
 # 🔹 로그 저장 디렉토리 생성
-log_dir="logs"
+log_dir="regression_logs"
 mkdir -p $log_dir
 
 # 🔹 실행

@@ -17,7 +17,7 @@ k_folds=5
 input_dim=1024
 
 # 로그 디렉토리
-log_dir="logs"
+log_dir="classification_logs"
 mkdir -p $log_dir
 
 # 실행
