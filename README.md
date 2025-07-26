@@ -71,7 +71,7 @@ python extract_embedding.py \
 
 ### 3-2. Downstream Tasks
 
-**모든 downstream dataset의 label 컬럼 이름은 반드시 `labels`로 변경되어 있어야 합니다.**
+**⚠️주의 : 모든 downstream dataset의 label 컬럼 이름은 반드시 `labels`로 변경되어 있어야 합니다.**
 
 
 #### (1) Classification
@@ -86,7 +86,7 @@ chmod +x run_classification.sh
 
 > 💡 참고: run_classification.sh 파일에서 batch_size, epochs, input_dim 등의 파라미터 조정 가능
 
-#### 📗 (2) Regression
+#### (2) Regression
 
 ```bash
 chmod +x run_regression.sh
